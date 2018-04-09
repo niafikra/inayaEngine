@@ -1,0 +1,62 @@
+spring:
+    profiles: dev
+    datasource:
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://127.0.0.1:3306/inaya2
+        username: root
+        password: "freedom"
+        pooled: true
+
+name: test-YAML
+envinronment: test
+servers:
+    - www.abc.test.com
+    - www.cba.com
+
+hibernate:
+    hbm2ddl:
+        auto: update
+    dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+
+---spring:
+    profiles: test
+    datasource:
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://127.0.0.1:3306/inaya2Test
+        username: root
+        password: "freedom"
+        pooled: true
+
+name: test-YAML
+envinronment: test
+servers:
+    - www.abc.test.com
+    - www.cba.com
+
+hibernate:
+    hbm2ddl:
+        auto: update
+    dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+
+---
+
+spring:
+     profiles: prod
+     datasource:
+         driverClassName: com.mysql.jdbc.Driver
+         url:   jdbc:mysql://127.0.0.1:3306/inaya2
+         username: root
+         password: "freedom"
+         pooled: true
+
+name: prod-YAML
+envinronment: prod
+servers:
+    - www.abc.test.com
+    - www.cba.com
+
+hibernate:
+    hbm2ddl:
+        auto: update
+    dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+
