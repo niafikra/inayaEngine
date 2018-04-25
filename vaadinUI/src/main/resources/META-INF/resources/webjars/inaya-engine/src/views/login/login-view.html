@@ -1,0 +1,77 @@
+<link rel="import" href="/webjars/polymer/polymer-element.html">
+<link rel="import" href="/webjars/iron-form/iron-form.html">
+<link rel="import" href="/webjars/iron-icon/iron-icon.html">
+<link rel="import" href="/webjars/vaadin-text-field/src/vaadin-text-field.html">
+<link rel="import" href="/webjars/vaadin-text-field/src/vaadin-password-field.html">
+<link rel="import" href="/webjars/vaadin-button/src/vaadin-button.html">
+
+<dom-module id="login-view">
+    <template>
+        <div class="container">
+            <div>
+                <h1>inaya</h1>
+                <p>The world begins here</p>
+            </div>
+            <iron-form id="form" allow-redirect>
+                <form method="post" action="login">
+                    <h2>Sign In</h2>
+                    <div>
+                        <vaadin-text-field id="username" name="username" label="Username" autofocus required>
+                        </vaadin-text-field>
+
+                        <vaadin-password-field
+                                required
+                                id="password"
+                                name="password"
+                                label="Password"
+                                on-keydown="_onPasswordKeydown">
+                        </vaadin-password-field>
+
+                        <vaadin-button on-tap="login" theme="primary">
+                            Sign In
+                        </vaadin-button>
+
+                        <template is="dom-if" if="[[error]]">
+                            <div>
+                                <icon-icon icon="vaadin:exclamation-circle-o" class="error__icon"></icon-icon>
+                                <p>The username and password you entered is incorrect. Please try again</p>
+                            </div>
+                        </template>
+                    </div>
+                </form>
+            </iron-form>
+        </div>
+
+    </template>
+
+    <script>
+        class LoginView extends Polymer.GestureEventListeners(Polymer.Element) {
+            static get is() {
+                return 'login-view';
+            }
+
+            static get properties() {
+                return {
+                    error: {
+                        type: Boolean,
+                        value: false
+                    }
+                };
+            }
+
+            login() {
+                if (!this.$.username.invalid && !this.$.password.invalid) {
+                    this.$.form.submit();
+                }
+            }
+
+            _onPasswordKeydown(event) {
+                if (event.key === 'Enter') {
+                    this.login();
+                }
+            }
+        }
+
+        customElements.define(LoginView.is, LoginView);
+    </script>
+</dom-module>

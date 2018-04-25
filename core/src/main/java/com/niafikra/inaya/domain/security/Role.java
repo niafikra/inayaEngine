@@ -5,8 +5,12 @@
 
 package com.niafikra.inaya.domain.security;
 
+import com.niafikra.inaya.domain.HasName;
+import com.niafikra.inaya.domain.InayaEntity;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,41 +21,20 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "CR_Role")
-public class Role implements Serializable {
-    @Id
-    @GeneratedValue
-    private Long id;
-    private String roleName;
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class Role extends InayaEntity implements HasName {
+
+    @Column(unique = true)
+    private String name;
+
     @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.EAGER)
     private Set<Permission> permissions = new HashSet<>();
-    @Version
-    private Long version;
 
     public Role() {
 
     }
 
-    public String getRoleName() {
-        return roleName;
-    }
-
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
-    }
-
-    public Set<Permission> getPermissions() {
-        if (permissions == null) permissions = new HashSet<>();
-        return permissions;
-    }
-
-    public void setPermissions(Set<Permission> permissions) {
-        this.permissions = permissions;
-    }
-
-    @Override
-    public String toString() {
-        return roleName;
-    }
 
     /**
      * Add a permission to a role
@@ -70,6 +53,11 @@ public class Role implements Serializable {
      */
     public void removePermission(Permission permission) {
         permissions.remove(permission);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
 }

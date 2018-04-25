@@ -8,12 +8,13 @@ import com.niafikra.inaya.domain.InayaEntity;
 import com.niafikra.inaya.domain.person.Person;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class contains the authentication details and permissions for
@@ -25,17 +26,22 @@ import java.util.Set;
 @Table(name = "CR_Authentication")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Authentication extends InayaEntity {
+public class User extends InayaEntity implements UserDetails {
 
     public static final String SYSTEM_USER_NAME = "inaya";
 
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, fetch = FetchType.EAGER)
     private Person person;
-    private String loginName = "";
+    private String username = "";
     private String password = "";
+    private boolean accountNonExpired;
+    private boolean accountNonLocked;
+    private boolean credentialsNonExpired;
+    private boolean enabled;
+
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, fetch = FetchType.EAGER)
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
     private boolean blocked;
     private String locale = "";
 
@@ -49,27 +55,31 @@ public class Authentication extends InayaEntity {
     private Map<String, String> profileSetup = new HashMap<>();
 
 
-    public Authentication() {
+    public User() {
     }
 
-    public Authentication(String loginName, String password, String locale, boolean blocked) {
-        this.loginName = loginName;
+    public User(String username, String password, String locale, boolean enabled) {
+        this.username = username;
         this.password = password;
         this.locale = locale;
-        this.blocked = blocked;
+        this.enabled = enabled;
     }
 
     public void setProfileSetup(String key, String setup) {
         profileSetup.put(key, setup);
     }
 
-    public Set<Role> getRoles() {
-        if (roles == null) roles = new HashSet<>();
-        return roles;
+    public String getProfileSetup(String key) {
+        return profileSetup.get(key);
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .flatMap(role -> role.getPermissions()
+                        .stream()
+                        .map(permission -> new SimpleGrantedAuthority(permission.getName())))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -80,21 +90,14 @@ public class Authentication extends InayaEntity {
      */
 
     public boolean hasPermission(String permissionName) {
-        for (Role role : roles) {
-            for (Permission permission : role.getPermissions()) {
-                if (permission.getPermissionName().trim().replace(" ", "").equals(permissionName.trim().replace(" ", ""))) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return roles.stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .anyMatch(permission -> permission.getName().equals(permissionName));
+
     }
 
     public boolean hasOneOfThePermissions(String... permissions) {
-        for (String permission : permissions) {
-            if (hasPermission(permission)) return true;
-        }
-        return false;
+        return Arrays.stream(permissions).anyMatch(this::hasPermission);
     }
 
     public String toString() {

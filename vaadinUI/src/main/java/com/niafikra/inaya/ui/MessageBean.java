@@ -1,4 +1,4 @@
-package com.niafikra.inaya;
+package com.niafikra.inaya.ui;
 
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
