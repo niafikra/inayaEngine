@@ -1,4 +1,4 @@
-naya is a very very opinionated way of building applications that won’t exceed the 10,000 concurrent users limit. It is aimed at enterprise applications or internal applications.
+inaya is a very very opinionated way of building applications that won’t exceed the 10,000 concurrent users limit. It is aimed at enterprise applications or internal applications.
 
 inaya provides the framework where most of the difficult Architectural and design decisions for such applications have already been made. Based on these decisions it provides tools which can be used to add functionality to it. 
 
