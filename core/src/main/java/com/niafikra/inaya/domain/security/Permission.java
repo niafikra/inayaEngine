@@ -49,6 +49,7 @@ public class Permission extends InayaEntity implements HasName {
     /**
      * Create permission from qualified name
      * qualified name is of the form moduleName:permissionName
+     *
      * @param qualifiedName
      */
     public Permission(String qualifiedName) {
@@ -69,7 +70,7 @@ public class Permission extends InayaEntity implements HasName {
      */
     public void buildFromName() {
         String[] permData = name.split("[:]");
-        module = permData[0];
+        module = permData[0].replace("ROLE_", "");
     }
 
     @Override

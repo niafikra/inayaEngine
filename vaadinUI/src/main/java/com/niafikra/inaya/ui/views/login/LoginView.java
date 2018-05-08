@@ -1,6 +1,7 @@
 package com.niafikra.inaya.ui.views.login;
 
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
 import com.vaadin.flow.router.AfterNavigationEvent;
@@ -19,6 +20,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 @PageTitle("inaya")
 @Theme(Lumo.class)
 public class LoginView extends PolymerTemplate<LoginView.Model> implements PageConfigurator, AfterNavigationListener {
+
     @Override
     public void afterNavigation(AfterNavigationEvent event) {
         boolean error = event.getLocation().getQueryParameters().getParameters().containsKey("error");

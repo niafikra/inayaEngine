@@ -1,4 +1,4 @@
-package com.niafikra.inaya.service;
+package com.niafikra.inaya.service.security;
 
 import com.niafikra.inaya.domain.security.User;
 import com.niafikra.inaya.repositories.security.UserRepository;
@@ -42,4 +42,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             return user;
         }
     }
+
+
 }

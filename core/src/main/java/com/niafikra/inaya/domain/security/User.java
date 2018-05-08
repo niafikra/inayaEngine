@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * @author mbwana
  */
 @Entity
-@Table(name = "CR_Authentication")
+@Table(name = "CR_User")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class User extends InayaEntity implements UserDetails {
@@ -49,10 +49,10 @@ public class User extends InayaEntity implements UserDetails {
     @ElementCollection
     @MapKeyColumn(name = "profile_setup_name")
     @Column(name = "profile_setup_value", columnDefinition = "longtext")
-    @CollectionTable(name = "authentication_profile_setup",
-            joinColumns = @JoinColumn(name = "authentication_id")
+    @CollectionTable(name = "cr_user_settings",
+            joinColumns = @JoinColumn(name = "user_id")
     )
-    private Map<String, String> profileSetup = new HashMap<>();
+    private Map<String, String> settings = new HashMap<>();
 
 
     public User() {
@@ -65,12 +65,12 @@ public class User extends InayaEntity implements UserDetails {
         this.enabled = enabled;
     }
 
-    public void setProfileSetup(String key, String setup) {
-        profileSetup.put(key, setup);
+    public void setSetting(String key, String setup) {
+        settings.put(key, setup);
     }
 
-    public String getProfileSetup(String key) {
-        return profileSetup.get(key);
+    public String getSetting(String key) {
+        return settings.get(key);
     }
 
     @Override
