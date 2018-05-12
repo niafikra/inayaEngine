@@ -38,7 +38,7 @@ public class RoleService {
         if(adminRole == null){
             adminRole = new Role();
             adminRole.setName("admin");
-
+            adminRole = save(adminRole);
         }
 
         return adminRole;

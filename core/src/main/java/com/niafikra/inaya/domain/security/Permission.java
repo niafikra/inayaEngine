@@ -70,7 +70,7 @@ public class Permission extends InayaEntity implements HasName {
      */
     public void buildFromName() {
         String[] permData = name.split("[:]");
-        module = permData[0].replace("ROLE_", "");
+        module = permData[0];
     }
 
     @Override

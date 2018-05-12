@@ -1,5 +1,6 @@
 package com.niafikra.inaya.app.security;
 
+import com.niafikra.inaya.app.CRPermission;
 import com.niafikra.inaya.domain.security.User;
 import com.niafikra.inaya.repositories.security.UserRepository;
 import com.niafikra.inaya.service.security.UserDetailsServiceImpl;
@@ -24,115 +25,114 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
  * <li>Restrict access to the application, allowing only logged in users,</li>
  * <li>Set up the login form,</li>
  * <li>Configures the {@link UserDetailsServiceImpl}.</li>
-
  */
 @EnableWebSecurity
 @Configuration
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-	private static final String LOGIN_PROCESSING_URL = "/login";
-	private static final String LOGIN_FAILURE_URL = "/login?error";
-	private static final String LOGIN_URL = "/login";
-	private static final String LOGOUT_SUCCESS_URL = "/logoutSucces";
+    private static final String LOGIN_PROCESSING_URL = "/login";
+    private static final String LOGIN_FAILURE_URL = "/login?error";
+    private static final String LOGIN_URL = "/login";
+    private static final String LOGOUT_SUCCESS_URL = "/logoutSucces";
 
-	private final UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-	@Autowired
-	public SecurityConfiguration(UserDetailsService userDetailsService) {
-		this.userDetailsService = userDetailsService;
-	}
+    @Autowired
+    public SecurityConfiguration(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
-	/**
-	 * The password encoder to use when encrypting passwords.
-	 */
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    /**
+     * The password encoder to use when encrypting passwords.
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	@Bean
-	@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-	public User currentUser(UserRepository userRepository) {
-	    return userRepository.findByUsernameIgnoreCase(SecurityUtils.getUsername());
-	}
-	
-	/**
-	 * Registers our UserDetailsService and the password encoder to be used on login attempts.
-	 */
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		super.configure(auth);
-		auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
-	}
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public User currentUser(UserRepository userRepository) {
+        return userRepository.findByUsernameIgnoreCase(SecurityUtils.getUsername());
+    }
 
-	/**
-	 * Require login to access internal pages and configure login form.
-	 */
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		// Not using Spring CSRF here to be able to use plain HTML for the login page
-		http.csrf().disable()
+    /**
+     * Registers our UserDetailsService and the password encoder to be used on login attempts.
+     */
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        super.configure(auth);
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    }
 
-				// Register our CustomRequestCache, that saves unauthorized access attempts, so
-				// the user is redirected after login.
-				.requestCache().requestCache(new CustomRequestCache())
+    /**
+     * Require login to access internal pages and configure login form.
+     */
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        // Not using Spring CSRF here to be able to use plain HTML for the login page
+        http.csrf().disable()
 
-				// Restrict access to our application.
-				.and().authorizeRequests()
+                // Register our CustomRequestCache, that saves unauthorized access attempts, so
+                // the user is redirected after login.
+                .requestCache().requestCache(new CustomRequestCache())
 
-				// Allow all flow internal requests.
-				.requestMatchers(SecurityUtils::isFrameworkInternalRequest).permitAll()
+                // Restrict access to our application.
+                .and().authorizeRequests()
 
-				// Allow all requests by logged in users.
-				.anyRequest().hasAnyAuthority() // all authorities
+                // Allow all flow internal requests.
+                .requestMatchers(SecurityUtils::isFrameworkInternalRequest).permitAll()
 
-				// Configure the login page.
-				.and().formLogin().loginPage(LOGIN_URL).permitAll().loginProcessingUrl(LOGIN_PROCESSING_URL)
-				.failureUrl(LOGIN_FAILURE_URL)
+                // Allow all requests by logged in users.
+                .anyRequest().hasAnyAuthority(CRPermission.USE_INAYA) // all authorities
 
-				// Register the success handler that redirects users to the page they last tried
-				// to access
-				.successHandler(new SavedRequestAwareAuthenticationSuccessHandler())
+                // Configure the login page.
+                .and().formLogin().loginPage(LOGIN_URL).permitAll().loginProcessingUrl(LOGIN_PROCESSING_URL)
+                .failureUrl(LOGIN_FAILURE_URL)
 
-				// Configure logout
-				.and().logout().logoutSuccessUrl(LOGOUT_SUCCESS_URL);
-	}
+                // Register the success handler that redirects users to the page they last tried
+                // to access
+                .successHandler(new SavedRequestAwareAuthenticationSuccessHandler())
 
-	/**
-	 * Allows access to static resources, bypassing Spring security.
-	 */
-	@Override
-	public void configure(WebSecurity web) throws Exception {
-		web.ignoring().antMatchers(
-				// Vaadin Flow static resources
-				"/VAADIN/**",
+                // Configure logout
+                .and().logout().logoutSuccessUrl(LOGOUT_SUCCESS_URL);
+    }
 
-				// the standard favicon URI
-				"/favicon.ico",
+    /**
+     * Allows access to static resources, bypassing Spring security.
+     */
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring().antMatchers(
+                // Vaadin Flow static resources
+                "/VAADIN/**",
 
-				// web application manifest
-				"/manifest.json",
-				"/sw-register.js",
-				"/sw.js",
-				"/offline-page.html",
+                // the standard favicon URI
+                "/favicon.ico",
 
-				// icons and images
-				"/icons/**",
-				"/images/**",
+                // web application manifest
+                "/manifest.json",
+                "/sw-register.js",
+                "/sw.js",
+                "/offline-page.html",
 
-				// (development mode) static resources
-				"/frontend/**",
+                // icons and images
+                "/icons/**",
+                "/images/**",
 
-				// (development mode) webjars
-				"/webjars/**",
+                // (development mode) static resources
+                "/frontend/**",
 
-				// (development mode) H2 debugging console
-				"/h2-console/**",
+                // (development mode) webjars
+                "/webjars/**",
 
-				// (production mode) static resources
-				"/frontend-es5/**", "/frontend-es6/**");
-	}
+                // (development mode) H2 debugging console
+                "/h2-console/**",
+
+                // (production mode) static resources
+                "/frontend-es5/**", "/frontend-es6/**");
+    }
 }
